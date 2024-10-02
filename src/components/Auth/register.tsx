@@ -1,0 +1,127 @@
+import React, {useState} from "react";
+// import {Link} from "react-router-dom";
+import { Form, Input, Button, Card, Typography, Divider,notification } from "antd";
+import "./custom.css"
+
+interface RegisterProps{
+    onRegister: (
+        firstname: string,
+        lastname: string,
+        username: string,
+        password: string,
+        email: string
+    )=> void;
+    toggleForm: () => void;
+
+}
+
+const { Title, Text } = Typography;
+
+const Register: React.FC<RegisterProps> = ({onRegister, toggleForm}) => {
+    const [firstname, setFirstname] = useState<string>("");
+    const [lastname, setlastname] = useState<string>("");
+    const [username, setUsername] = useState<string>("");
+    const [password, setPassword] = useState<string>("");
+    const [email, setEmail] = useState<string>("");
+
+
+      // Function to check password strength
+      const isPasswordStrong = (password: string): boolean => {
+        const trimmedPassword = password.trim(); // Trim the password here
+        const strongPasswordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+        return strongPasswordPattern.test(trimmedPassword);
+    };
+    
+    function handleSubmit(){
+      
+        if(username && password && firstname && lastname && email) {
+
+           // Check if the password is strong
+           if (!isPasswordStrong(password.trim())) {
+                notification.error({
+                message: 'Weak Password',
+                description: 'Password must be at least 8 characters long and include upper and lowercase letters, a number, and a special character.',
+            });
+            return;
+        }
+            const userData = {
+                username,
+                password,
+                firstname,
+                lastname,
+                email,
+            };
+            localStorage.setItem("userData", JSON.stringify(userData));
+            onRegister(username, password, firstname, lastname, email);
+            alert("Registration successful! Please login.")
+        }else{
+            alert("Please fill all the fields");
+        }
+    };
+
+
+    return(
+        <div className="register-container" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh',marginLeft: '500px' }}>
+            <Card title={null} style={{ width: 400, fontWeight: "lighter" , textAlign: "center", borderRadius: '1px',borderWidth: '2px',borderColor: 'white', boxShadow: '0 8px 16px rgba(0, 0, 0, 0.2)'}}>
+
+            <Title level={5} className="text-center" style ={{color: 'black', fontWeight: 'lighter',fontFamily: 'Arial', textTransform: 'uppercase'}}>Register</Title>
+
+              {/* Custom Divider with custom styles */}
+              <Divider style={{ borderColor: 'gray', borderStyle: 'solid', borderWidth: '1px', height: '1px' }} />
+                
+                <Form
+                    name="register_form"
+                    onFinish={handleSubmit}
+                    layout="vertical"
+                >
+                    <Form.Item
+                        label="First Name"
+                        name="firstname"
+                        rules={[{ required: true, message: 'Please input your first name!' }]}
+                    >
+                        <Input placeholder="Enter first name" onChange={(e) => setFirstname(e.target.value)} />
+                    </Form.Item>
+                    <Form.Item
+                        label="Last Name"
+                        name="lastname"
+                        rules={[{ required: true, message: 'Please input your last name!' }]}
+                    >
+                        <Input placeholder="Enter last name" onChange={(e) => setlastname(e.target.value)} />
+                    </Form.Item>
+                    <Form.Item
+                        label="Username"
+                        name="username"
+                        rules={[{ required: true, message: 'Please input your username!' }]}
+                    >
+                        <Input placeholder="Enter username" onChange={(e) => setUsername(e.target.value)} />
+                    </Form.Item>
+                    <Form.Item
+                        label="Password"
+                        name="password"
+                        rules={[{ required: true, message: 'Please input your password!' }]}
+                    >
+                        <Input.Password placeholder="Enter password" onChange={(e) => setPassword(e.target.value)} />
+                    </Form.Item>
+                    <Form.Item
+                        label="Email"
+                        name="email"
+                        rules={[{ required: true, type: 'email', message: 'Please input a valid email!' }]}
+                    >
+                        <Input placeholder="Enter email" onChange={(e) => setEmail(e.target.value)} />
+                    </Form.Item>
+                    <Form.Item>
+                        <Button type="primary" htmlType="submit" block>
+                            Register
+                        </Button>
+                    </Form.Item>
+                    <Form.Item>
+                        <Text>
+                            Already have an account? <Button type="link" onClick={toggleForm}>Login here</Button>
+                        </Text>
+                    </Form.Item>
+                </Form>
+            </Card>
+        </div>
+    );
+}
+export default Register;
