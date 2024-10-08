@@ -1,6 +1,7 @@
 import React, {useState} from "react";
 // import {Link} from "react-router-dom";
-import { Form, Input, Button, Card, Typography, Divider,notification } from "antd";
+import { Form, Input, Button, Card, Typography, Divider } from "antd";
+//notification
 import "./custom.css"
 
 interface RegisterProps{
@@ -9,7 +10,8 @@ interface RegisterProps{
         lastname: string,
         username: string,
         password: string,
-        email: string
+        email: string,
+        role: string
     )=> void;
     toggleForm: () => void;
 
@@ -23,36 +25,50 @@ const Register: React.FC<RegisterProps> = ({onRegister, toggleForm}) => {
     const [username, setUsername] = useState<string>("");
     const [password, setPassword] = useState<string>("");
     const [email, setEmail] = useState<string>("");
+    const [role, setRole]   = useState<string>("");
 
 
       // Function to check password strength
-      const isPasswordStrong = (password: string): boolean => {
-        const trimmedPassword = password.trim(); // Trim the password here
-        const strongPasswordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
-        return strongPasswordPattern.test(trimmedPassword);
-    };
+    //   const isPasswordStrong = (password: string): boolean => {
+    //     const trimmedPassword = password.trim(); // Trim the password here
+    //     const strongPasswordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    //     return strongPasswordPattern.test(trimmedPassword);
+    // };
     
     function handleSubmit(){
       
-        if(username && password && firstname && lastname && email) {
+        if(username && password && firstname && lastname && email && role) {
 
-           // Check if the password is strong
-           if (!isPasswordStrong(password.trim())) {
-                notification.error({
-                message: 'Weak Password',
-                description: 'Password must be at least 8 characters long and include upper and lowercase letters, a number, and a special character.',
-            });
-            return;
-        }
+            const existingUsers = JSON.parse(localStorage.getItem("users") || "[]");
+
+            const userExists = existingUsers.some((user: { username: string }) => user.username === username);
+            if (userExists) {
+                alert("Username already exists. Please choose a different username.");
+                return;
+            }
+
+        //    // Check if the password is strong
+        //    if (!isPasswordStrong(password.trim())) {
+        //         notification.error({
+        //         message: 'Weak Password',
+        //         description: 'Password must be at least 8 characters long and include upper and lowercase letters, a number, and a special character.',
+        //     });
+        //     return;
+        // }
             const userData = {
                 username,
                 password,
                 firstname,
                 lastname,
                 email,
+                role,
             };
-            localStorage.setItem("userData", JSON.stringify(userData));
-            onRegister(username, password, firstname, lastname, email);
+
+            existingUsers.push(userData);
+            localStorage.setItem("users", JSON.stringify(existingUsers));
+
+          
+            onRegister(username, password, firstname, lastname, email,role);
             alert("Registration successful! Please login.")
         }else{
             alert("Please fill all the fields");
@@ -108,6 +124,13 @@ const Register: React.FC<RegisterProps> = ({onRegister, toggleForm}) => {
                         rules={[{ required: true, type: 'email', message: 'Please input a valid email!' }]}
                     >
                         <Input placeholder="Enter email" onChange={(e) => setEmail(e.target.value)} />
+                    </Form.Item>
+                    <Form.Item 
+                    label ="role"
+                    name ="role"
+                    rules ={[{required: true, message: 'Please input your role!'}]}
+                    >
+                    <Input placeholder="Enter role" onChange={(e) => setRole(e.target.value)} />
                     </Form.Item>
                     <Form.Item>
                         <Button type="primary" htmlType="submit" block>
